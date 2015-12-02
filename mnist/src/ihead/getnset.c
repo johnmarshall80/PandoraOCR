@@ -125,19 +125,19 @@ IHEAD *head;
   return(strdup(head->created));
 }
 
-set_created(head)
-IHEAD *head;
-{
-  char *current_time();
-  char *cur_time;
-
-  if (head==NULL)
-     fatalerr("set_created","pointer head is NULL",NULL);
-  if ((cur_time = current_time()) == NULL)
-     memset(head->created,NULL,DATELEN);
-  else
-    strcpy(head->created, cur_time);
-}
+//set_created(head)
+//IHEAD *head;
+//{
+//  char *current_time();
+//  char *cur_time;
+//
+//  if (head==NULL)
+//     fatalerr("set_created","pointer head is NULL",NULL);
+//  if ((cur_time = current_time()) == NULL)
+//     memset(head->created,NULL,DATELEN);
+//  else
+//    strcpy(head->created, cur_time);
+//}
 
 get_width(head)
 IHEAD *head;

@@ -100,34 +100,34 @@ int main(int argc, char *argv[])
             if (parameters.m_shouldDisplayEventTime)
                 (void) gettimeofday(&startTime, NULL);
 
-            int j, k, l;
-            char *data8, *dptr;
+            char *data8 = nullptr;
             char *misfile = const_cast<char*>(parameters.m_characterFile.c_str());
-std::cout << "1About to contact mnist " << std::endl;
+
             MIS *mis = readmisfile(misfile);
-std::cout << "2" << std::endl;
+
             if (mis->misd != 1)
             {
                 std::cout << "incorrect entry size or depth" << std::endl;
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
             }
-std::cout << "3" << std::endl;
+
             if ((data8 = (char *)malloc(mis->misw * mis->mish * sizeof(char))) == NULL)
             {
                 std::cout << "unable to allocate 8 bit space" << std::endl;
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
             }
-std::cout << "4" << std::endl;
+
             bits2bytes(reinterpret_cast<u_char*>(mis->data), reinterpret_cast<u_char*>(data8), static_cast<u_int>(mis->misw * mis->mish));
-std::cout << "5" << std::endl;
-            for (dptr = data8, j = 0 ; j < mis->ent_num ; j++ )
+
+            char *dptr = data8;
+            for (int j = 0 ; j < mis->ent_num ; j++ )
             {   
-                for ( k = 0 ; k < mis->enth ; k++ )
-                    for ( l = 0 ; l < mis->entw ; l++ )
+                for (int k = 0 ; k < mis->enth ; k++ )
+                    for (int l = 0 ; l < mis->entw ; l++ )
                         fprintf(stdout, "%c%c", ( *dptr++ ) ? '#' : '.', ((l+1) % mis->misw) ? ' ' : '\n');
                 fprintf(stdout, "\n");
             }   
-std::cout << "6" << std::endl;
+
             free(data8);
             freemis(mis);
 
