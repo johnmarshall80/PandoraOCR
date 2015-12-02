@@ -9,6 +9,7 @@
 void syserr(funcname, syscall, msg)
 char *funcname, *syscall, *msg;
 {
+/*
 //   extern int errno, sys_nerr;
 //   extern char *sys_errlist[];
 //   int err;
@@ -25,6 +26,13 @@ char *funcname, *syscall, *msg;
 //   else
 //      (void) fprintf(stderr,")\n");
 //   (void) fflush(stderr);
+*/
+   (void) fflush(stdout);
+   if(msg == NULL)
+      (void) fprintf(stderr,"ERROR: %s: %s ",funcname,syscall);
+   else
+      (void) fprintf(stderr,"ERROR: %s: %s: %s ",funcname,syscall,msg);
+   (void) fflush(stderr);
 
    exit(-1);
 }

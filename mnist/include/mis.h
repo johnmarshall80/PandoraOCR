@@ -54,11 +54,11 @@ typedef struct misstruct{
 #define PAR_Y		0
 
 extern MIS *allocmis();
-// ATTN TODO extern MIS *readmisfile();
+/* ATTN TODO extern MIS *readmisfile(); */
 extern MIS *readmishdr();
 extern void appendmis();
 extern unsigned char *extractmis();
 extern void changemis();
 extern void deletemis();
-// ATTN TODO extern void freemis();
+/* ATTN TODO extern void freemis(); */
 extern IHEAD *buildmishdr();
