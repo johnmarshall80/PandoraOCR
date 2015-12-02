@@ -1,32 +1,39 @@
 /**
- *  @file   TestPandora/src/PandoraInterface.cc
+ *  @file   TestPandora/src/PandoraOCR.cc
  *
- *  @brief  Implementation for the pandora interface binary
+ *  @brief  Implementation for the pandora ocr application
  *
  *  $Log: $
  */
 
-// External Pandora includes
 #include "Api/PandoraApi.h"
-
-extern "C"
-{
-#include <ihead.h>
-#include <mis.h>
-}
-
-#include "OCRPseudoLayerPlugin.h"
-#include "VisualMonitoringAlgorithm.h"
 
 #ifdef MONITORING
 #include "TApplication.h"
 #endif
+
+#include "OCRPseudoLayerPlugin.h"
+#include "VisualMonitoringAlgorithm.h"
 
 #include <cstdlib>
 #include <iostream>
 #include <string>
 #include <unistd.h>
 #include <sys/time.h>
+
+extern "C"
+{
+    #include "ihead.h"
+    #include "mis.h"
+
+    MIS *readmisfile(char *file);
+    void bits2bytes(u_char *p, u_char *q, u_int pixels);
+    void freemis(MIS *mis);
+}
+
+using namespace pandora;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  Parameters class
@@ -61,12 +68,19 @@ bool ParseCommandLine(int argc, char *argv[], Parameters &parameters);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-extern "C"
-{
-    void bits2bytes(u_char *p, u_char *q, u_int pixels);
-    void freemis(MIS *mis);
-    MIS *readmisfile(char *file);
-}
+/**
+ *  @brief  Create a new hit in a pandora instance
+ *
+ *  @param  pPandora address of the pandora instance
+ *  @param  hitX the hit x coordinate
+ *  @param  hitZ the hit z coordinate
+ *  @param  hitCounter the hit counter
+ *
+ *  @return status code
+ */
+StatusCode CreateHit(const Pandora *const pPandora, const float hitX, const float hitZ, unsigned int &hitCounter);
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
 {
@@ -82,58 +96,60 @@ int main(int argc, char *argv[])
         pTApplication->SetReturnFromRun(kTRUE);
 #endif
         // Construct pandora instance
-        const pandora::Pandora *const pPandora = new pandora::Pandora();
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerPlugin(*pPandora, new ocr_content::OCRPseudoLayerPlugin));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPandora, "OCRVisualMonitoring", new ocr_content::VisualMonitoringAlgorithm::Factory));
+        const Pandora *const pPandora = new Pandora();
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerPlugin(*pPandora, new ocr_content::OCRPseudoLayerPlugin));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPandora, "OCRVisualMonitoring", new ocr_content::VisualMonitoringAlgorithm::Factory));
 
         // Read in pandora settings from config file       
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, parameters.m_pandoraSettingsFile));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, parameters.m_pandoraSettingsFile));
 
-        // Process the events
-        int nEvents(0);
+        // Read in character file
+        MIS *pMis = readmisfile(const_cast<char*>(parameters.m_characterFile.c_str()));
 
-        while ((nEvents++ < parameters.m_nEventsToProcess) || (0 > parameters.m_nEventsToProcess))
+        if (pMis->misd != 1)
         {
+            std::cout << "incorrect entry size or depth" << std::endl;
+            throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+        }
+
+        u_char *const pBytesData = new u_char[pMis->misw * pMis->mish];
+        bits2bytes(pMis->data, pBytesData, pMis->misw * pMis->mish);
+
+        unsigned int hitCounter(0);
+        const u_char *pBytesDataAccess(pBytesData);
+
+        // Process the events (characters)
+        for (int iCharacter = 0 ; iCharacter < pMis->ent_num ; ++iCharacter)
+        {
+            if ((iCharacter >= parameters.m_nEventsToProcess) && (0 < parameters.m_nEventsToProcess))
+                break;
+
             struct timeval startTime, endTime;
 
             if (parameters.m_shouldDisplayEventNumber)
-                std::cout << std::endl << "   PROCESSING EVENT: " << (nEvents - 1) << std::endl << std::endl;
+                std::cout << std::endl << "   PROCESSING EVENT: " << iCharacter << std::endl << std::endl;
 
             if (parameters.m_shouldDisplayEventTime)
                 (void) gettimeofday(&startTime, NULL);
 
-            char *data8 = nullptr;
-            char *misfile = const_cast<char*>(parameters.m_characterFile.c_str());
-
-            MIS *mis = readmisfile(misfile);
-
-            if (mis->misd != 1)
+            for (int iPixelZ = 0 ; iPixelZ < pMis->enth ; ++iPixelZ)
             {
-                std::cout << "incorrect entry size or depth" << std::endl;
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+                for (int iPixelX = 0 ; iPixelX < pMis->entw ; ++iPixelX)
+                {
+                    const bool isFilledPixel(*pBytesDataAccess++);
+                    //std::cout << (isFilledPixel ? "#" : ".") << (((l + 1) % pMis->misw) ? " " : "\n");
+
+                    if (!isFilledPixel)
+                        continue;
+
+                    // ATTN Mirror z to support default event display view
+                    const float hitX(static_cast<float>(iPixelX + 0.5f));
+                    const float hitZ(static_cast<float>(pMis->enth - iPixelZ - 0.5f));
+                    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, CreateHit(pPandora, hitX, hitZ, hitCounter));
+                }
             }
 
-            if ((data8 = (char *)malloc(mis->misw * mis->mish * sizeof(char))) == NULL)
-            {
-                std::cout << "unable to allocate 8 bit space" << std::endl;
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-            }
-
-            bits2bytes(reinterpret_cast<u_char*>(mis->data), reinterpret_cast<u_char*>(data8), static_cast<u_int>(mis->misw * mis->mish));
-
-            char *dptr = data8;
-            for (int j = 0 ; j < mis->ent_num ; j++ )
-            {   
-                for (int k = 0 ; k < mis->enth ; k++ )
-                    for (int l = 0 ; l < mis->entw ; l++ )
-                        fprintf(stdout, "%c%c", ( *dptr++ ) ? '#' : '.', ((l+1) % mis->misw) ? ' ' : '\n');
-                fprintf(stdout, "\n");
-            }   
-
-            free(data8);
-            freemis(mis);
-
-            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
+            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
 
             if (parameters.m_shouldDisplayEventTime)
             {
@@ -141,12 +157,14 @@ int main(int argc, char *argv[])
                 std::cout << "Event time " << (endTime.tv_sec + (endTime.tv_usec / 1.e6) - startTime.tv_sec - (startTime.tv_usec / 1.e6)) << std::endl;
             }
 
-            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*pPandora));
-        }
+            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*pPandora));
+        }   
 
+        freemis(pMis);
+        delete [] pBytesData;
         delete pPandora;
     }
-    catch (pandora::StatusCodeException &statusCodeException)
+    catch (StatusCodeException &statusCodeException)
     {
         std::cerr << "Pandora Exception caught: " << statusCodeException.ToString() << std::endl;
         return 1;
@@ -193,6 +211,35 @@ bool ParseCommandLine(int argc, char *argv[], Parameters &parameters)
     }
 
     return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CreateHit(const Pandora *const pPandora, const float hitX, const float hitZ, unsigned int &hitCounter)
+{
+    PandoraApi::CaloHit::Parameters caloHitParameters;
+    caloHitParameters.m_positionVector = CartesianVector(hitX, 0.f, hitZ);
+    caloHitParameters.m_expectedDirection = CartesianVector(0.f, 0.f, 1.f);
+    caloHitParameters.m_cellNormalVector = CartesianVector(0.f, 0.f, 1.f);
+    caloHitParameters.m_cellGeometry = RECTANGULAR;
+    caloHitParameters.m_cellSize0 = 0.9f;
+    caloHitParameters.m_cellSize1 = 0.9f;
+    caloHitParameters.m_cellThickness = 0.9f;
+    caloHitParameters.m_nCellRadiationLengths = 0.1f;
+    caloHitParameters.m_nCellInteractionLengths = 0.1f;
+    caloHitParameters.m_time = 0.f;
+    caloHitParameters.m_inputEnergy = 1.f;
+    caloHitParameters.m_mipEquivalentEnergy = 1.f;
+    caloHitParameters.m_electromagneticEnergy = 1.f;
+    caloHitParameters.m_hadronicEnergy = 1.f;
+    caloHitParameters.m_isDigital = false;
+    caloHitParameters.m_hitType = HIT_CUSTOM;
+    caloHitParameters.m_hitRegion = SINGLE_REGION;
+    caloHitParameters.m_layer = 0;
+    caloHitParameters.m_isInOuterSamplingLayer = false;
+    caloHitParameters.m_pParentAddress = reinterpret_cast<void *>(hitCounter++);
+
+    return PandoraApi::CaloHit::Create(*pPandora, caloHitParameters);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
