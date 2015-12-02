@@ -16,6 +16,7 @@ extern "C"
 }
 
 #include "OCRPseudoLayerPlugin.h"
+#include "VisualMonitoringAlgorithm.h"
 
 #ifdef MONITORING
 #include "TApplication.h"
@@ -82,10 +83,11 @@ int main(int argc, char *argv[])
 #endif
         // Construct pandora instance
         const pandora::Pandora *const pPandora = new pandora::Pandora();
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerPlugin(*pPandora, new OCRPseudoLayerPlugin));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerPlugin(*pPandora, new ocr_content::OCRPseudoLayerPlugin));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPandora, "OCRVisualMonitoring", new ocr_content::VisualMonitoringAlgorithm::Factory));
 
-        // Read in pandora settings from config file
-//        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, parameters.m_pandoraSettingsFile));
+        // Read in pandora settings from config file       
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, parameters.m_pandoraSettingsFile));
 
         // Process the events
         int nEvents(0);
@@ -131,7 +133,7 @@ int main(int argc, char *argv[])
             free(data8);
             freemis(mis);
 
-            //PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
 
             if (parameters.m_shouldDisplayEventTime)
             {
