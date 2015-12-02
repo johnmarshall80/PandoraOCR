@@ -10,6 +10,9 @@
 
 #include "Plugins/PseudoLayerPlugin.h"
 
+namespace ocr_content
+{
+
 /**
  *  @brief  OCRPseudoLayerPlugin class
  */
@@ -44,5 +47,7 @@ private:
     float           m_zOffset;      ///< The z offset
     unsigned int    m_zerothLayer;  ///< The zeroth layer
 };
+
+} // namespace ocr_content
 
 #endif // #ifndef OCR_PSEUDO_LAYER_PLUGIN_H

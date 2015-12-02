@@ -16,6 +16,9 @@
 
 using namespace pandora;
 
+namespace ocr_content
+{
+
 OCRPseudoLayerPlugin::OCRPseudoLayerPlugin() :
     m_zPitch(1.f),
     m_zOffset(0.01f),
@@ -61,3 +64,5 @@ pandora::StatusCode OCRPseudoLayerPlugin::ReadSettings(const pandora::TiXmlHandl
 
     return STATUS_CODE_SUCCESS;
 }
+
+} // namespace ocr_content
