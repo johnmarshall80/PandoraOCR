@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <malloc.h>
+/*#include <malloc.h>*/
 #include <ihead.h>
 
 /************************************************************/

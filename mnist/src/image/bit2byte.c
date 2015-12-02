@@ -6,7 +6,7 @@
 /* LINTLIBRARY */
 
 #include <stdio.h>
-#include <values.h>
+/*#include <values.h>*/
 #include <sys/param.h>
 #include <sys/types.h>
 
@@ -16,6 +16,9 @@
 #define Fatal(s)	fatalerr((s),(char *)NULL,(char *)NULL)
 #endif
 
+#ifndef BITSPERBYTE
+#define BITSPERBYTE 8
+#endif
 
 bits2bytes(p,q,pixels)
 register u_char *p, *q;
