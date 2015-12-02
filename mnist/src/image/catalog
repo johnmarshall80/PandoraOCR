@@ -1,0 +1,120 @@
+ binary_subimage_copy_8 - copies a binary subimage that is a multiple
+                          of 8 bits wide.
+ binary_subimage_copy_gt - special condition when copying a
+                           binary subimage.
+ binary_subimage_copy_lt - special condition when copying a
+                           binary subimage.
+ binary_subimage_copy_eq - special condition when copying a
+                           binary subimage.
+ binary_subimage_copy - copies a binary subimage to another image
+                        at a specified location.
+ binary_fill_partial - uses a logical operator to copy pixels from a
+                       location in one binary scanline to a location in
+                       another binary scanline.
+ gb - gets a pixel from a binary scanline.
+
+ sb - sets a pixel in a binary scanline.
+
+ nandbinimage - logically NANDs two binary bitmaps together, returning
+                the results in a new image.
+ binary_subimage_or_8 - uses a logical OR operator to copy a binary
+                        subimage that is a multiple of 8 bits wide.
+ binary_subimage_or_gt - special condition when using a logical OR
+                         operator to copy a binary subimage.
+ binary_subimage_or_lt - special condition when using a logical OR
+                         operator to copy a binary subimage.
+ binary_subimage_or_eq - special condition when using a logical OR
+                         operator to copy a binary subimage.
+ binary_subimage_or - uses a logical OR operator to copy a binary
+                      subimage to another image at a specified
+                      location.
+ bits2bytes - promotes a binary image to a grayscale image.
+
+ bytes2bits - converts a grayscale image into a binary image.
+
+ char2bin_exact - converts an binary character image to a binary
+                  bitmap byte-aligning the resulting image width.
+ pixelcnt - counts the number of black pixels in a binary character
+            image.
+ shift_row - takes a row of character pixels and shifts them left or
+             right by a given number of pixel into an output row.
+ left_pix - locates the first nonzero pixel left-to-right in a given
+            row of character pixels and returns -1 if no pixel is found.
+ char_top - locates the first row of pixels top-to-bottom in a character
+            image that contains a nonzero pixel and returns -1 if no
+            row is found.
+ char_bottom - locates the first row of pixels bottom-to-top in a
+               character image that contains a nonzero pixel and
+               returns -1 if no row is found.
+ find_corners - determines the box bounding the black pixels within
+                a binary bitmap based on histograms and thresholds.
+ f_fit_param3_image2 - returns a transformed binary image by applying
+                       precomputed Least Squares parameters and quickly
+                       pushing pixels and conditionally filling speckle
+                       noise in the resulting image (fastest).
+ grp4comp - CCITT Group 4 compresses an image.
+
+ grp4decomp - CCITT Group 4 decompresses an image.
+
+ compute_hist - computes a horizontal or vertical spatial histogram
+                from a binary bitmap.
+ compute_x_hist - computes a horizontal spatial histogram from a
+                  binary bitmap.
+ compute_y_hist - computes a vertical spatial histogram from a
+                  binary bitmap.
+ cut_image - returns the subimage from a binary bitmap that is
+             byte aligned in origin and width.
+ cut_exact_image - returns the exact subimage requested from a binary
+                   bitmap.
+ imagedup - takes an image of specified depth and duplicates its
+            contents in a new image.
+ PixPerByte - returns the pixel per byte factor given the depth of
+              a pixel in an image.
+ SizeFromDepth - computes the byte size of an image based on the
+                 image's pixel width, pixel height, and pixel depth.
+ allocate_image - allocates an image of specified width, height, and
+                  depth.
+ erode_charimage - set true pixel to zero if any of 4 neighbors is zero
+                   in a character image.
+ dilate_charimage - set false pixel to one if any of 4 neighbors is one
+                    in a character image.
+ get_south8 - return value of char image pixel 1 below of current pixel
+              if defined else return (char)0
+ get_north8 - return value of char image pixel 1 above of current pixel
+              if defined else return (char)0
+ get_east8  - return value of char image pixel 1 right of current pixel
+              if defined else return (char)0
+ get_west8  - return value of char image pixel 1 left  of current pixel
+              if defined else return (char)0
+ ReadBinaryRaster - reads the contents of a binary IHead image file
+                    into an IHead structure and image memory.
+ find_first_thresh_forward - finds the position and value of the first
+                             integer that exceeds a threshold searching
+                             forward in a specified section of a list.
+ find_first_thresh_backward - finds the position and value of the first
+                              integer that exceeds a threshold searching
+                              backward in a specified section of a list.
+ writeihdrfile - writes the contents of an IHead structure and an
+                 image memory to the specified file.
+ zoom - scales a binary bitmap up or down depending on the x & y factors
+        passed.
+ zoom_x - scales a binary bitmap up or down based on the x factor
+          passed.
+ zoom_y - scales a binary bitmap up or down based on the y factor
+          passed.
+ enlarge_x - expand a binary bitmap's columns by the x factor passed.
+
+ enlarge_y - expand a binary bitmap's rows by the y factor passed.
+
+ shrink_x - down sample a binary bitmap's columns by the x factor
+            passed.
+ shrink_y - down sample a binary bitmap's rows by the y factor passed.
+
+ copy_cols - copies a single column of pixels to a range of column
+             locations in a destination image.
+ copy_col - copies a column of pixels to a column location in a
+            destination image.
+ copy_rows - copies a single row of pixels to a range of row locations
+             in a destination image.
+ copy_row - copies a row of pixels to a row location in a destination
+            image.

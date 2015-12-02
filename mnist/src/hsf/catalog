@@ -1,0 +1,10 @@
+ norm_2nd_gen - conducts second generation spatial normalization on
+                the characters in the specified mis structure given
+                the primary space statistics on each character.
+ norm_2nd_gen2 - conducts second generation spatial normalization on
+                 the characters in the specified mis structure without
+                 the use of primary space statistics.
+ shear_mis - takes characters in the specified mis structure and
+             horizontally shears them in order to straighten them up.
+ shear_char - takes a binary bitmap of a character and horizontally
+              shears it in order to straighten the character up.
