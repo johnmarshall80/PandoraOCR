@@ -39,12 +39,9 @@ CCompilerFLAGS = -c -g -fPIC -O2 -Wall -Wextra -pedantic -Wno-long-long -Wshadow
 
 MNIST_INCLUDES = -I $(PROJECT_DIR)/mnist/include/
 
-MNIST_SOURCES  =  $(wildcard $(PROJECT_DIR)/mnist/src/hsf/*.c)
 MNIST_SOURCES +=  $(wildcard $(PROJECT_DIR)/mnist/src/ihead/*.c)
 MNIST_SOURCES +=  $(wildcard $(PROJECT_DIR)/mnist/src/image/*.c)
-MNIST_SOURCES +=  $(wildcard $(PROJECT_DIR)/mnist/src/mfs/*.c)
 MNIST_SOURCES +=  $(wildcard $(PROJECT_DIR)/mnist/src/mis/*.c)
-MNIST_SOURCES +=  $(wildcard $(PROJECT_DIR)/mnist/src/mit/*.c)
 MNIST_SOURCES +=  $(wildcard $(PROJECT_DIR)/mnist/src/util/*.c)
 
 MNIST_OBJECTS = $(MNIST_SOURCES:.c=.o)
